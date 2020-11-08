@@ -12,18 +12,20 @@ OS: Raspbian
 ## Configure
 hboader
 
-1. git pull https://github.com/Janiot/hbloader.git
-1. cd hbloader
-1. rename hblcfg_sample.json to hblcfg.json 
-1. sudo nano hblcfg.json
-2. Enter tenant_id, login and password
-3. sudo pip3 install -r requirements.txt
-4. sudo python3 hbloader.py
-5. go to https://console.eu1.bosch-iot-rollouts.com/UI/#!deployment and deploy APP
+    git pull https://github.com/Janiot/hbloader.git
+    cd hbloader
+    rename hblcfg_sample.json to hblcfg.json 
+    sudo nano hblcfg.json
+    Enter tenant_id, login and password
+    sudo pip3 install -r requirements.txt
+    sudo python3 hbloader.py
+    go to https://console.eu1.bosch-iot-rollouts.com/UI/#!deployment and deploy APP
 
-1. sudo docker ps 
-2. sudo docker stop xy
-3. sudo docker rm xy
+### Stop & remove Docker Container
+
+    sudo docker ps 
+    sudo docker stop xy
+    sudo docker rm xy
 
 
 
