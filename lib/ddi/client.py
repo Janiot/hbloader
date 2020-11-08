@@ -42,14 +42,15 @@ class DDIClient(object):
         429: 'Too many requests.'
     }
 
-    def __init__(self, session, host, ssl, auth_token, tenant_id, controller_id, timeout=10):
+    def __init__(self, session, timeout=10, **kwargs):
+        self.logger = logging.getLogger('hbloader')
         self.session = session
-        self.host = host
-        self.ssl = ssl
-        self.logger = logging.getLogger('rauc_hawkbit')
-        self.headers = {'Authorization': 'TargetToken {}'.format(auth_token)}
-        self.tenant = tenant_id
-        self.controller_id = controller_id
+        self.host = '{}:{}'.format(kwargs['ip'],kwargs['port'])
+        self.ssl = kwargs['ssl']
+        self.headers = {'Authorization': 'TargetToken {}'.format(kwargs['auth_token'])}
+        self.logger.debug('Headers:  '.format(self.headers))
+        self.tenant = kwargs['tenant_id']
+        self.controller_id = kwargs['controller_id']
         self.timeout = timeout
         # URL parts which get replaced lateron
         self.placeholders = ['tenant', 'target', 'softwaremodule', 'action',
@@ -60,14 +61,17 @@ class DDIClient(object):
 
     @property
     def cancelAction(self):
+        self.logger.info('')
         return CancelAction(self)
 
     @property
     def softwaremodules(self):
+        self.logger.info('')
         return SoftwareModules(self)
 
     @property
     def deploymentBase(self):
+        self.logger.info('')
         return DeploymentBase(self)
 
     async def __call__(self):
@@ -78,6 +82,7 @@ class DDIClient(object):
 
         Returns: JSON data
         """
+        self.logger.info('')
         return await self.get_resource('/{tenant}/controller/v1/{controllerId}')
 
     async def configData(self, status_execution, status_result, action_id='',
@@ -97,6 +102,7 @@ class DDIClient(object):
            status_details((tuple, list)): List of details to provide
            other: passed as custom configuration data (key/value)
         """
+        self.logger.info('')
         assert isinstance(action_id, str), 'id must be string'
         assert isinstance(status_result, ConfigStatusResult), \
             'status_result_finished must be ConfigStatusResult enum'
@@ -134,8 +140,10 @@ class DDIClient(object):
         Returns:
             Expanded API URL with protocol (http/https) and host prepended
         """
+        self.logger.info('')
+
         protocol = 'https' if self.ssl else 'http'
-        return '{protocol}://{host}{api_path}'.format(
+        return '{protocol}://device.{host}{api_path}'.format(
             protocol=protocol, host=self.host, api_path=api_path)
 
     async def get_resource(self, api_path, query_params={}, **kwargs):
@@ -151,6 +159,9 @@ class DDIClient(object):
         Returns:
             Response JSON data
         """
+
+        self.logger.info('')
+        
         get_headers = {
             'Accept': 'application/json',
             **self.headers
@@ -161,7 +172,7 @@ class DDIClient(object):
                     controllerId=self.controller_id,
                     **kwargs))
 
-        self.logger.debug('GET {}'.format(url))
+        self.logger.debug('GET {} {}'.format(url, get_headers))
         async with self.session.get(url, headers=get_headers,
                                     params=query_params,
                                     timeout=ClientTimeout(self.timeout)) as resp:
@@ -189,6 +200,8 @@ class DDIClient(object):
         Returns:
             MD5 hash of downloaded content
         """
+        self.logger.info('')
+
         url = self.build_api_url(
                 api_path.format(
                     tenant=self.tenant,
@@ -214,6 +227,8 @@ class DDIClient(object):
         Returns:
             MD5 hash of downloaded content
         """
+        self.logger.info('')
+
         get_bin_headers = {
             'Accept': mime,
             **self.headers
@@ -229,7 +244,7 @@ class DDIClient(object):
                                     timeout=timeout) as resp:
 
             await self.check_http_status(resp)
-            with open(dl_location, 'wb') as fd:
+            with dl_location.open('wb') as fd:
                 while True:
                     chunk, _ = await resp.content.readchunk()
 
@@ -252,6 +267,8 @@ class DDIClient(object):
         Keyword Args:
             kwargs: keyword args used for replacing items in the API path
         """
+        self.logger.info('')
+
         post_headers = {
             'Content-Type': 'application/json',
             'Accept': 'application/json',
@@ -279,6 +296,8 @@ class DDIClient(object):
         Keyword Args:
             kwargs: keyword args used for replacing items in the API path
         """
+        self.logger.info('') 
+        
         put_headers = {
             'Content-Type': 'application/json',
             **self.headers
@@ -298,6 +317,8 @@ class DDIClient(object):
 
     async def check_http_status(self, resp):
         """Log API error message."""
+        self.logger.info('')
+        
         if resp.status != 200:
             error_description = await resp.text()
             if error_description:
