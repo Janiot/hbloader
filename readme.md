@@ -12,16 +12,22 @@ OS: Raspbian
 ## Configure
 hboader
 
-On first run programm asks following parameters:
+1. git pull https://github.com/Janiot/hbloader.git
+1. cd hbloader
+1. rename hblcfg_sample.json to hblcfg.json 
+1. sudo nano hblcfg.json
+2. Enter tenant_id, login and password
+3. sudo pip3 install -r requirements.txt
+4. sudo python3 hbloader.py
+5. go to https://console.eu1.bosch-iot-rollouts.com/UI/#!deployment and deploy APP
 
-* HawkBit IP address
-* HawkBit TCP port (default: 8080)
-* Device name (visible name)
-* Management interface login (default: admin)
-* Management interface password (default: admin)
-* Run as service' - run installed software as Linux service
+1. sudo docker ps 
+2. sudo docker stop xy
+3. sudo docker rm xy
 
 
+
+License: LGPLv2.1
 
 Copyright
 ---------
@@ -48,5 +54,5 @@ https://github.com/rauc/rauc-hawkbit
     License along with this library; if not, write to the Free Software
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
-License: LGPLv2.1
+
 

@@ -1,0 +1,17 @@
+{
+    "ssl": "True",
+    "host": "eu1.bosch-iot-rollouts.com",
+    "tenant_id": "",
+    "target_name": "newtarget1",
+    "login": "",
+    "password": "",
+    "auth_token": "",
+    "attributes": {
+        "MAC": ""
+    },
+    "loglevel": "DEBUG",
+    "run_as_service": "no",
+    "port": "443",
+    "ip": "eu1.bosch-iot-rollouts.com",
+    "controller_id": "125458"
+}
