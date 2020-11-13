@@ -252,18 +252,14 @@ class HBClient(object):
 
         uri = manifest["imageUri"]
         options = manifest["containerCreateOptions"]
-        port_bindings = options ["HostConfig"]["PortBindings"]
+        port_bindings = options["HostConfig"]["PortBindings"]
         
+        ports = {}
         for port_int, port_list in port_bindings.items(): 
-            port_ext = port_list[0]["HostPort"]
-
-        print(port_ext)
-        print(port_int)
-        print(uri)
-        
-        ports = {port_int : port_ext}
+            ports[port_int] = [entry["HostPort"] for entry in port_list]
         print (ports)
-        
+
+        print(uri)
         self.docker_client = docker.from_env()
         client = docker.from_env()
         
