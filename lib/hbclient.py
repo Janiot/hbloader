@@ -518,7 +518,7 @@ class HBClient(object):
         t = datetime.strptime(sleep_str, '%H:%M:%S')
         delta = timedelta(hours=t.hour, minutes=t.minute, seconds=t.second)
         # await asyncio.sleep(delta.total_seconds())
-        await asyncio.sleep(30)
+        await asyncio.sleep(15)
 
     def create_service_file(self,
                             service_file_name,
