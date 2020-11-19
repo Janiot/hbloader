@@ -262,7 +262,8 @@ class HBClient(object):
         network_mode = (options["HostConfig"]["NetworkMode"] if options["HostConfig"].get("NetworkMode") else 'bridge')
         print (network_mode)
 
-        volumes = (options["HostConfig"]["volumes"] if options["HostConfig"].get("volumes") else [])
+        volumes = (options["HostConfig"]["volumes"] if options["HostConfig"].get("volumes") else ['actyx_data:/data'])
+        print (volumes)
 
         print(uri)
         self.docker_client = docker.from_env()
