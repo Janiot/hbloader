@@ -372,7 +372,8 @@ class HBClient(object):
                                         log_config=log_config,
                                         ports=ports,
                                         privileged=True,
-                                        volumes=volumes)
+                                        volumes=volumes,
+                                        restart='always')
 
         self.logger.info('container {} {} {}'.format(container.short_id,
                                                      container.name,
