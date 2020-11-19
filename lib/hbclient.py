@@ -373,7 +373,7 @@ class HBClient(object):
                                         ports=ports,
                                         privileged=True,
                                         volumes=volumes,
-                                        restart='always')
+                                        restart_policy={"Name": 'always', "MaximumRetryCount": 1000})
 
         self.logger.info('container {} {} {}'.format(container.short_id,
                                                      container.name,
