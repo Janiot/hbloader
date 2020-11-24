@@ -105,7 +105,7 @@ class HBClient(object):
                 self.logger.info("content item: {}".format(item))
                 if item['controllerId'] == self.controller_id:
                     return item
-        self.logger.info('no content')     
+        self.logger.info('no content')
         return None
 
     async def start_polling(self, wait_on_error=60):
@@ -242,27 +242,33 @@ class HBClient(object):
             raise APIError(str(e))
 
     async def install(self):
-        
+
         self.logger.info('{} {}'.format(self.dl_dir, self.dl_filename))
         manifest_file_name = Path(self.dl_dir).joinpath(self.dl_filename)
         manifest = {}
 
         with open(manifest_file_name, "r") as manifest_file:
-            manifest = json.load(manifest_file) 
+            manifest = json.load(manifest_file)
 
         uri = manifest["imageUri"]
         options = manifest["containerCreateOptions"]
         port_bindings = options["HostConfig"]["PortBindings"]
-        
+
         ports = {}
-        for port_int, port_list in port_bindings.items(): 
+        for port_int, port_list in port_bindings.items():
             ports[port_int] = [entry["HostPort"] for entry in port_list]
         print (ports)
+
+        network_mode = (options["HostConfig"]["NetworkMode"] if options["HostConfig"].get("NetworkMode") else 'bridge')
+        print (network_mode)
+
+        volumes = (options["HostConfig"]["volumes"] if options["HostConfig"].get("volumes") else ['actyx_data:/data'])
+        print (volumes)
 
         print(uri)
         self.docker_client = docker.from_env()
         client = docker.from_env()
-        
+
         print("pulling image")
         self.docker_client.images.pull(uri)
         print("pull done")
@@ -270,7 +276,7 @@ class HBClient(object):
         self.logger.info("Image load finished.")
         #self.logger.info("Images available:\n{}".format(images))
 
-        await self.process_image(uri, ports)
+        await self.process_image(uri, ports, volumes, network_mode)
 
 
     async def install_old(self):
@@ -296,7 +302,7 @@ class HBClient(object):
 
             with open(dl_location, 'rb') as image:
                 images = self.docker_client.images.load(image)
-            
+
             rc = 0
             self.logger.info("Image load finished.")
             self.logger.info("Images available:\n{}".format(images))
@@ -329,6 +335,9 @@ class HBClient(object):
     async def uninstall(self):
         pass
 
+    async def cancel(self, base):
+        pass
+
 
     def ask_yn(self):
         '''
@@ -345,7 +354,7 @@ class HBClient(object):
 
             print('Wrong input')
 
-    async def process_image(self, image, ports):
+    async def process_image(self, image, ports = {}, volumes=[], network_mode = 'bridge'):
         '''
         Make descision about image usage
         and run container if yes.
@@ -360,17 +369,21 @@ class HBClient(object):
         log_config = LogConfig(type=LogConfig.types.JSON, config=log_params)
         container = self.docker_client.containers.run(image,
                                         detach=True,
-                                        log_config=log_config, 
-                                        ports=ports)
+                                        log_config=log_config,
+                                        ports=ports,
+                                        privileged=True,
+                                        volumes=volumes,
+                                        network_mode=network_mode,
+                                        restart_policy={"Name": 'always'})
 
         self.logger.info('container {} {} {}'.format(container.short_id,
                                                      container.name,
                                                      container.status))
-                                                     
-                                                     
+
+
         status_execution = DeploymentStatusExecution.closed
         status_result = DeploymentStatusResult.success
-                                                     
+
         await self.ddi.deploymentBase[self.action_id].feedback(
                 status_execution, status_result, ['Install completed'])
 
@@ -438,7 +451,7 @@ class HBClient(object):
 
         if self.step_callback:
             self.step_callback(0, "Downloading bundle...")
-        
+
         self.dl_filename = 'manifest.json'
 
         self.logger.debug('dl_filename: {}'.format(self.dl_filename))
@@ -507,7 +520,7 @@ class HBClient(object):
         t = datetime.strptime(sleep_str, '%H:%M:%S')
         delta = timedelta(hours=t.hour, minutes=t.minute, seconds=t.second)
         # await asyncio.sleep(delta.total_seconds())
-        await asyncio.sleep(30)
+        await asyncio.sleep(15)
 
     def create_service_file(self,
                             service_file_name,
